@@ -1,0 +1,197 @@
+﻿<controls:MetroWindow x:Class="ListFilesByDate.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:model="clr-namespace:ListFilesByDate.Model"
+                      ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+                      Title="List Files By Date" Width="800" Height="600"
+                      GlowBrush="{DynamicResource AccentColorBrush}">
+    <!--  RightWindowCommands  -->
+    <controls:MetroWindow.RightWindowCommands>
+        <controls:WindowCommands>
+            <!--  Settings  -->
+            <Button Click="ToggleSettingsFlyoutClick">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_settings}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="5 0 0 0" VerticalAlignment="Center" Text="Settings" />
+                </StackPanel>
+            </Button>
+        </controls:WindowCommands>
+    </controls:MetroWindow.RightWindowCommands>
+    <!-- TaskbarItemInfo -->
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo />
+    </Window.TaskbarItemInfo>
+    <!--Grid-->
+    <Grid>
+        <!-- Choose Date-->
+        <Label Width="35" Height="30" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Date" />
+        <DatePicker Name="FilterDate" Height="30" Margin="50,10,0,0" VerticalAlignment="Top" IsTodayHighlighted="True" HorizontalAlignment="Left" Width="115" SelectedDateFormat="Short">
+            <DatePicker.CommandBindings>
+                <CommandBinding CanExecute="CommandBindingCanExecute" Executed="CommandBindingExecuted">
+                    <CommandBinding.Command>model:Commands.SelectToday</CommandBinding.Command>
+                </CommandBinding>
+            </DatePicker.CommandBindings>
+            <DatePicker.CalendarStyle>
+                <Style TargetType="{x:Type Calendar}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Calendar}">
+                                <StackPanel Name="PART_Root" HorizontalAlignment="Center">
+                                    <CalendarItem Name="PART_CalendarItem" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}"
+                                                  BorderThickness="{TemplateBinding Control.BorderThickness}" Style="{TemplateBinding Calendar.CalendarItemStyle}" />
+                                    <Button Content="Today"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}}">
+                                        <Button.Command>model:Commands.SelectToday</Button.Command>
+                                    </Button>
+                                </StackPanel>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DatePicker.CalendarStyle>
+        </DatePicker>
+        <!-- Time -->
+        <Label Width="35" Height="30" Margin="170,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Time" />
+        <controls:NumericUpDown Name="FilterHour" Height="30" Width="75" Margin="170,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Minimum="0" Maximum="23" />
+        <controls:NumericUpDown Name="FilterMinute" Height="30" Width="75" Margin="250,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Minimum="00" Maximum="59" />
+        <!-- Date Type -->
+        <Label Width="35" Height="30" Margin="330,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Type" />
+        <ComboBox Name="DateType" Height="30" Margin="370,10,220,0" VerticalAlignment="Top">
+            <ComboBoxItem Content="creation time" IsSelected="True" />
+            <ComboBoxItem Content="last access time" />
+            <ComboBoxItem Content="last write time" />
+        </ComboBox>
+        <!--  Search Direction  -->
+        <controls:ToggleSwitch Name="SearchDirection" Margin="0,10,110,0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="105" Height="30"
+                               OnSwitchBrush="{DynamicResource AccentColorBrush}" OnLabel="older" OffSwitchBrush="{DynamicResource AccentColorBrush}" OffLabel="newer" FontSize="12" FontFamily="Segoe UI Semibold, Segoe UI, Lucida Sans Unicode, Verdana" />
+        <!-- Save -->
+        <Button Name="Save" Width="100" Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Click="BrowseClick">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="20" Height="20"
+                           Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_save}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="save" />
+            </StackPanel>
+        </Button>
+        <!-- Initial Directory -->
+        <Label Width="35" Height="30" Margin="10,45,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Path" />
+        <TextBox x:Name="InitialDirectory" Height="30" Margin="50,45,220,0" VerticalAlignment="Top"
+                 LostFocus="InitialDirectoryOnLostFocus" />
+        <!-- Browse -->
+        <Button Name="Browse" Width="100" Margin="0,45,115,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Click="BrowseClick">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="20" Height="20"
+                           Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="browse" />
+            </StackPanel>
+        </Button>
+        <!-- Check -->
+        <Button x:Name="Check" Width="100" Margin="0,45,10,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Click="CheckDatesOnClick">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="20" Height="20"
+                           Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_progress}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="check" />
+            </StackPanel>
+        </Button>
+        <TextBox Name="Output" Margin="10,80,10,10" IsReadOnly="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 Text="It probably will take a while until you see results. Window may be inactive." />
+    </Grid>
+    <!-- Flyouts -->
+    <controls:MetroWindow.Flyouts>
+        <controls:FlyoutsControl>
+            <!-- Settings Flyout -->
+            <controls:Flyout Name="SettingsFlyout" Width="600" AnimateOnPositionChange="True" AnimateOpacity="True"
+                             Header="Settings" Position="Right" Theme="Accent">
+                <StackPanel>
+                    <!-- Line -->
+                    <StackPanel Margin="0,10,0,0" Orientation="Vertical">
+                        <Rectangle Width="570" VerticalAlignment="Stretch" Stroke="{DynamicResource AccentColorBrush}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <!-- Logging -->
+                        <StackPanel Margin="10,5,0,0" Orientation="Horizontal">
+                            <!--Label-->
+                            <Label Width="60" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                   Content="Logging" />
+
+                            <!--TextBox-->
+                            <TextBox Name="LoggingPath" Height="30" Width="400" Margin="10,5,0,0"
+                                     HorizontalAlignment="Left" VerticalAlignment="Top" LostFocus="LoggingPathOnLostFocus" />
+                            <!--Button-->
+                            <Button Name="BrowseLoggingPath" Width="95" Margin="10,5,0,0" HorizontalAlignment="Right"
+                                    VerticalAlignment="Top" Click="BrowseLoggingPathClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="20" Height="20"
+                                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                        <Rectangle.OpacityMask>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder}" />
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="browse" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                    <!-- Line -->
+                    <StackPanel Margin="0,10,0,0" Orientation="Vertical">
+                        <Rectangle Width="570" VerticalAlignment="Stretch" Stroke="{DynamicResource AccentColorBrush}" />
+                    </StackPanel>
+                    <!--Application Style-->
+                    <StackPanel>
+                        <!-- Theme -->
+                        <StackPanel Margin="10,5,0,0" Orientation="Horizontal">
+                            <Label Width="60" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                   Content="Theme" />
+                            <RadioButton Name="Dark" Margin="10,5,5,0" Checked="Theme" Content="Dark" />
+                            <RadioButton Name="Light" Margin="10,5,5,0" Checked="Theme" Content="Light"
+                                         IsChecked="True" />
+                        </StackPanel>
+                        <!-- Accent -->
+                        <StackPanel Margin="10,5,0,0" Orientation="Horizontal">
+                            <Label Width="60" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                   Content="Accent" />
+                            <ComboBox Name="Accent" Width="505" Margin="10,5,0,0" HorizontalAlignment="Left"
+                                      VerticalAlignment="Top"
+                                      SelectionChanged="AccentOnSelectionChanged" />
+                        </StackPanel>
+                        <!-- Save Style -->
+                        <StackPanel Margin="10,5,0,0" Orientation="Horizontal">
+                            <Button Name="SaveStyle" Width="505" Margin="70,5,0,0" Click="SaveStyleClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="16" Height="16"
+                                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                        <Rectangle.OpacityMask>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_save}" />
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="save style" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </controls:Flyout>
+        </controls:FlyoutsControl>
+    </controls:MetroWindow.Flyouts>
+</controls:MetroWindow>
