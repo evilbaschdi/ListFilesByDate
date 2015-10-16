@@ -1,8 +1,4 @@
-﻿using ListFilesByDate.Core;
-using ListFilesByDate.Internal;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -12,6 +8,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
+using ListFilesByDate.Core;
+using ListFilesByDate.Internal;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ListFilesByDate
 {
@@ -101,7 +101,7 @@ namespace ListFilesByDate
             {
                 // DateTime.Today, Time.LastWrite
 
-                if (_checkFileDates.IsDifferent(file, dateType, filterDate, direction))
+                if(_checkFileDates.IsDifferent(file, dateType, filterDate, direction))
                 {
                     var checkFiles = _checkFileDates.For(file);
                     var output =
@@ -121,6 +121,7 @@ namespace ListFilesByDate
 
         private DateTime GetFilterDateTime()
         {
+            // ReSharper disable once PossibleInvalidOperationException
             var filterDate = FilterDate.SelectedDate.Value;
             return new DateTime(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
                 Convert.ToInt32(FilterMinute.Value), 0);
@@ -149,7 +150,7 @@ namespace ListFilesByDate
 
         private void InitialDirectoryOnLostFocus(object sender, RoutedEventArgs e)
         {
-            if (Directory.Exists(InitialDirectory.Text))
+            if(Directory.Exists(InitialDirectory.Text))
             {
                 Properties.Settings.Default.InitialDirectory = InitialDirectory.Text;
                 Properties.Settings.Default.Save();
@@ -169,13 +170,13 @@ namespace ListFilesByDate
 
         private void ToggleFlyout(int index, bool stayOpen = false)
         {
-            var activeFlyout = (Flyout)Flyouts.Items[index];
-            if (activeFlyout == null)
+            var activeFlyout = (Flyout) Flyouts.Items[index];
+            if(activeFlyout == null)
             {
                 return;
             }
 
-            foreach (
+            foreach(
                 var nonactiveFlyout in
                     Flyouts.Items.Cast<Flyout>()
                         .Where(nonactiveFlyout => nonactiveFlyout.IsOpen && nonactiveFlyout.Name != activeFlyout.Name))
@@ -183,7 +184,7 @@ namespace ListFilesByDate
                 nonactiveFlyout.IsOpen = false;
             }
 
-            if (activeFlyout.IsOpen && stayOpen)
+            if(activeFlyout.IsOpen && stayOpen)
             {
                 activeFlyout.IsOpen = true;
             }
@@ -226,7 +227,7 @@ namespace ListFilesByDate
 
         private void LoggingPathOnLostFocus(object sender, RoutedEventArgs e)
         {
-            if (Directory.Exists(LoggingPath.Text))
+            if(Directory.Exists(LoggingPath.Text))
             {
                 Properties.Settings.Default.LoggingPath = LoggingPath.Text;
                 Properties.Settings.Default.Save();
@@ -246,7 +247,7 @@ namespace ListFilesByDate
 
         private void CommandBindingExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            ((Calendar)e.Parameter).SelectedDate = DateTime.Now.Date;
+            ((Calendar) e.Parameter).SelectedDate = DateTime.Now.Date;
         }
 
         #endregion Choose Date
