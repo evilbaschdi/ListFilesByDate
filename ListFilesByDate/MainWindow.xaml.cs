@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
 using EvilBaschdi.Core.DirectoryExtensions;
-using EvilBaschdi.Core.MultiThreading;
+using EvilBaschdi.Core.Threading;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
 using MahApps.Metro.Controls;
@@ -150,7 +150,7 @@ namespace ListFilesByDate
             // ReSharper disable once PossibleInvalidOperationException
             var filterDate = FilterDate.SelectedDate.Value;
             return new DateTime(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
-                Convert.ToInt32(FilterMinute.Value), 0);
+                       Convert.ToInt32(FilterMinute.Value), 0);
         }
 
         public async void ShowMessage(string title, string message)
@@ -204,8 +204,8 @@ namespace ListFilesByDate
 
             foreach (
                 var nonactiveFlyout in
-                    Flyouts.Items.Cast<Flyout>()
-                           .Where(nonactiveFlyout => nonactiveFlyout.IsOpen && nonactiveFlyout.Name != activeFlyout.Name))
+                Flyouts.Items.Cast<Flyout>()
+                       .Where(nonactiveFlyout => nonactiveFlyout.IsOpen && nonactiveFlyout.Name != activeFlyout.Name))
             {
                 nonactiveFlyout.IsOpen = false;
             }
