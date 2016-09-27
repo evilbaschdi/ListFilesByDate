@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
+using EvilBaschdi.Core.DirectoryExtensions;
+using EvilBaschdi.Core.Threading;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
 using MahApps.Metro.Controls;
@@ -92,31 +95,54 @@ namespace ListFilesByDate
         private void CheckDates(string dateType, DateTime filterDate, bool? direction)
         {
             var outputList = new List<string>();
-            var outputText = $"Start: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}";
+            var outputBuilder = new StringBuilder();
 
-            var filePath = new FilePath();
-            var fileList = filePath.GetFileList(_initialDirectory).Distinct();
+            var excludeExtensionList = new List<string>
+                                       {
+                                           "sln",
+                                           "db"
+                                       };
 
-            Parallel.ForEach(fileList, file =>
-            {
-                // DateTime.Today, Time.LastWrite
+            var excludeFileNameList = new List<string>
+                                      {
+                                          "listfilesbydate_log_"
+                                      };
 
-                if(_checkFileDates.IsDifferent(file, dateType, filterDate, direction))
+            var excludeFilePathList = new List<string>
+                                      {
+                                          "deploy",
+                                          ".vs",
+                                          "argos-localizer",
+                                          ".git"
+                                      };
+
+            var multiThreadingHelper = new MultiThreadingHelper();
+            var filePath = new FilePath(multiThreadingHelper);
+            var fileList = filePath.GetFileList(_initialDirectory, null, excludeExtensionList, null, excludeFileNameList, null, excludeFilePathList).Distinct();
+            outputBuilder.Append($"Start: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}");
+
+            Parallel.ForEach(fileList,
+                file =>
                 {
-                    var checkFiles = _checkFileDates.For(file);
-                    var output =
-                        $"{checkFiles.FileName}{Environment.NewLine}{checkFiles.CreationTime}{Environment.NewLine}{checkFiles.LastWriteTime}{Environment.NewLine}{checkFiles.LastAccessTime}{Environment.NewLine}{Environment.NewLine}";
+                    // DateTime.Today, Time.LastWrite
 
-                    outputList.Add(output);
-                }
-            });
+                    if (_checkFileDates.IsDifferent(file, dateType, filterDate, direction))
+                    {
+                        var checkFiles = _checkFileDates.For(file);
+                        var output =
+                            $"{checkFiles.FileName}{Environment.NewLine}" +
+                            $"{checkFiles.CreationTime}{Environment.NewLine}" +
+                            $"{checkFiles.LastWriteTime}{Environment.NewLine}" +
+                            $"{checkFiles.LastAccessTime}{Environment.NewLine}{Environment.NewLine}";
 
-            outputList.ForEach(o => outputText += o);
-            outputText += $"End: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}";
-            _result = outputText;
-            File.AppendAllText(
-                $@"{_loggingPath}\ListFilesByDate_Log_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.txt",
-                outputText);
+                        outputList.Add(output);
+                    }
+                });
+
+            outputList.ForEach(o => outputBuilder.Append(o));
+            outputBuilder.Append($"End: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}");
+            _result = outputBuilder.ToString();
+            File.AppendAllText($@"{_loggingPath}\ListFilesByDate_Log_{DateTime.Now:yyyy-MM-dd_HHmm}.txt", _result);
         }
 
         private DateTime GetFilterDateTime()
@@ -124,15 +150,15 @@ namespace ListFilesByDate
             // ReSharper disable once PossibleInvalidOperationException
             var filterDate = FilterDate.SelectedDate.Value;
             return new DateTime(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
-                Convert.ToInt32(FilterMinute.Value), 0);
+                       Convert.ToInt32(FilterMinute.Value), 0);
         }
 
         public async void ShowMessage(string title, string message)
         {
             var options = new MetroDialogSettings
-            {
-                ColorScheme = MetroDialogColorScheme.Theme
-            };
+                          {
+                              ColorScheme = MetroDialogColorScheme.Theme
+                          };
 
             MetroDialogOptions = options;
             await this.ShowMessageAsync(title, message);
@@ -150,7 +176,7 @@ namespace ListFilesByDate
 
         private void InitialDirectoryOnLostFocus(object sender, RoutedEventArgs e)
         {
-            if(Directory.Exists(InitialDirectory.Text))
+            if (Directory.Exists(InitialDirectory.Text))
             {
                 Properties.Settings.Default.InitialDirectory = InitialDirectory.Text;
                 Properties.Settings.Default.Save();
@@ -171,20 +197,20 @@ namespace ListFilesByDate
         private void ToggleFlyout(int index, bool stayOpen = false)
         {
             var activeFlyout = (Flyout) Flyouts.Items[index];
-            if(activeFlyout == null)
+            if (activeFlyout == null)
             {
                 return;
             }
 
-            foreach(
+            foreach (
                 var nonactiveFlyout in
-                    Flyouts.Items.Cast<Flyout>()
-                        .Where(nonactiveFlyout => nonactiveFlyout.IsOpen && nonactiveFlyout.Name != activeFlyout.Name))
+                Flyouts.Items.Cast<Flyout>()
+                       .Where(nonactiveFlyout => nonactiveFlyout.IsOpen && nonactiveFlyout.Name != activeFlyout.Name))
             {
                 nonactiveFlyout.IsOpen = false;
             }
 
-            if(activeFlyout.IsOpen && stayOpen)
+            if (activeFlyout.IsOpen && stayOpen)
             {
                 activeFlyout.IsOpen = true;
             }
@@ -227,7 +253,7 @@ namespace ListFilesByDate
 
         private void LoggingPathOnLostFocus(object sender, RoutedEventArgs e)
         {
-            if(Directory.Exists(LoggingPath.Text))
+            if (Directory.Exists(LoggingPath.Text))
             {
                 Properties.Settings.Default.LoggingPath = LoggingPath.Text;
                 Properties.Settings.Default.Save();
