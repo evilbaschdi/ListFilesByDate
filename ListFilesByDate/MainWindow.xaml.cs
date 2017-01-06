@@ -1,44 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
+using EvilBaschdi.Core.Application;
 using EvilBaschdi.Core.DirectoryExtensions;
 using EvilBaschdi.Core.Threading;
+using EvilBaschdi.Core.Wpf;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
 using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
+using Calendar = System.Windows.Controls.Calendar;
 
 namespace ListFilesByDate
 {
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
+    // ReSharper disable once RedundantExtendsListEntry
     public partial class MainWindow : MetroWindow
     {
         private readonly BackgroundWorker _bw;
         private string _result;
-        private readonly IApplicationStyle _style;
+        private readonly IMetroStyle _style;
         private readonly IApplicationBasics _basics;
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+        private readonly ISettings _coreSettings;
         private readonly ICheckFileDates _checkFileDates;
+        private readonly IDialogService _dialogService;
         private string _initialDirectory;
         private string _loggingPath;
+        private int _overrideProtection;
 
         public MainWindow()
         {
-            _style = new ApplicationStyle(this);
             _basics = new ApplicationBasics();
+
             InitializeComponent();
+            _coreSettings = new CoreSettings(Properties.Settings.Default);
+            var themeManagerHelper = new ThemeManagerHelper();
+            _style = new MetroStyle(this, Accent, ThemeSwitch, _coreSettings, themeManagerHelper);
+            _style.Load(true);
+            _dialogService = new DialogService(this);
             _bw = new BackgroundWorker();
             TaskbarItemInfo = new TaskbarItemInfo();
-            _style.Load();
             ValidateForm();
             _checkFileDates = new CheckFileDates();
         }
@@ -48,6 +61,8 @@ namespace ListFilesByDate
         //todo: Logging
         private void ValidateForm()
         {
+            var linkerTime = Assembly.GetExecutingAssembly().GetLinkerTime();
+            LinkerTime.Content = linkerTime.ToString(CultureInfo.InvariantCulture);
             Check.IsEnabled = !string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory) &&
                               Directory.Exists(Properties.Settings.Default.InitialDirectory);
 
@@ -65,6 +80,7 @@ namespace ListFilesByDate
             FilterDate.SelectedDate = date.Date;
             FilterHour.Value = date.Hour;
             FilterMinute.Value = date.Minute;
+            _overrideProtection = 1;
         }
 
         private void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -74,7 +90,7 @@ namespace ListFilesByDate
                 $"Files for date '{GetFilterDateTime()}' were checked." +
                 $"{Environment.NewLine}You can find the logging file at '{_loggingPath}'.";
 
-            ShowMessage("Completed", message);
+            _dialogService.ShowMessage("Completed", message);
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             Cursor = Cursors.Arrow;
         }
@@ -150,18 +166,7 @@ namespace ListFilesByDate
             // ReSharper disable once PossibleInvalidOperationException
             var filterDate = FilterDate.SelectedDate.Value;
             return new DateTime(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
-                       Convert.ToInt32(FilterMinute.Value), 0);
-        }
-
-        public async void ShowMessage(string title, string message)
-        {
-            var options = new MetroDialogSettings
-                          {
-                              ColorScheme = MetroDialogColorScheme.Theme
-                          };
-
-            MetroDialogOptions = options;
-            await this.ShowMessageAsync(title, message);
+                Convert.ToInt32(FilterMinute.Value), 0);
         }
 
         #region Initial Directory
@@ -222,24 +227,44 @@ namespace ListFilesByDate
 
         #endregion Flyout
 
-        #region Style
+        #region MetroStyle
 
         private void SaveStyleClick(object sender, RoutedEventArgs e)
         {
+            if (_overrideProtection == 0)
+            {
+                return;
+            }
             _style.SaveStyle();
         }
 
-        private void Theme(object sender, RoutedEventArgs e)
+        private void Theme(object sender, EventArgs e)
         {
-            _style.SetTheme(sender, e);
+            if (_overrideProtection == 0)
+            {
+                return;
+            }
+            var routedEventArgs = e as RoutedEventArgs;
+            if (routedEventArgs != null)
+            {
+                _style.SetTheme(sender, routedEventArgs);
+            }
+            else
+            {
+                _style.SetTheme(sender);
+            }
         }
 
         private void AccentOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_overrideProtection == 0)
+            {
+                return;
+            }
             _style.SetAccent(sender, e);
         }
 
-        #endregion Style
+        #endregion MetroStyle
 
         #region Check Settings
 

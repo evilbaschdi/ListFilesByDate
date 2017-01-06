@@ -7,12 +7,12 @@ namespace ListFilesByDate.Core
         public void BrowseFolder()
         {
             var folderDialog = new FolderBrowserDialog
-            {
-                SelectedPath = GetInitialDirectory()
-            };
+                               {
+                                   SelectedPath = GetInitialDirectory()
+                               };
 
             var result = folderDialog.ShowDialog();
-            if(result.ToString() != "OK")
+            if (result.ToString() != "OK")
             {
                 return;
             }
@@ -31,12 +31,12 @@ namespace ListFilesByDate.Core
         public void BrowseLoggingFolder()
         {
             var folderDialog = new FolderBrowserDialog
-            {
-                SelectedPath = GetLoggingPath()
-            };
+                               {
+                                   SelectedPath = GetLoggingPath()
+                               };
 
             var result = folderDialog.ShowDialog();
-            if(result.ToString() != "OK")
+            if (result.ToString() != "OK")
             {
                 return;
             }
