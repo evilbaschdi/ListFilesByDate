@@ -2,9 +2,9 @@
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                      xmlns:model="clr-namespace:ListFilesByDate.Model"
-                      ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
-                      Title="List Files By Date" Width="800" Height="600"
+                      xmlns:model="clr-namespace:ListFilesByDate.Model" TitleCharacterCasing="Normal"
+                      ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="fbd.ico"
+                      Title="List Files By Date" Width="800" Height="600" ShowIconOnTitleBar="False"
                       GlowBrush="{DynamicResource AccentColorBrush}">
     <!--  RightWindowCommands  -->
     <controls:MetroWindow.RightWindowCommands>
