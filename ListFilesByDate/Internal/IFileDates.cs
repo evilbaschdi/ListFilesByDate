@@ -1,19 +1,21 @@
+using System;
+
 namespace ListFilesByDate.Internal
 {
     public interface IFileDates
     {
         string FileName { get; set; }
 
-        string CreationTime { get; set; }
+        DateTime CreationTime { get; set; }
 
-        string LastAccessTime { get; set; }
+        DateTime LastAccessTime { get; set; }
 
-        string LastWriteTime { get; set; }
+        DateTime LastWriteTime { get; set; }
 
-        string CreationTimeUtc { get; set; }
+        DateTime CreationTimeUtc { get; set; }
 
-        string LastAccessTimeUtc { get; set; }
+        DateTime LastAccessTimeUtc { get; set; }
 
-        string LastWriteTimeUtc { get; set; }
+        DateTime LastWriteTimeUtc { get; set; }
     }
 }

@@ -8,15 +8,15 @@ namespace ListFilesByDate.Internal
         public FileDates For(string path)
         {
             var fileDates = new FileDates
-            {
-                FileName = $"file name: {Path.GetFileName(path)}",
-                CreationTime = $"creation time: {File.GetCreationTime(path)}",
-                LastAccessTime = $"last access time: {File.GetLastAccessTime(path)}",
-                LastWriteTime = $"last write time: {File.GetLastWriteTime(path)}",
-                CreationTimeUtc = $"creation time (UTC): {File.GetCreationTimeUtc(path)}",
-                LastAccessTimeUtc = $"last access time (UTC): {File.GetLastAccessTimeUtc(path)}",
-                LastWriteTimeUtc = $"last write time (UTC): {File.GetLastWriteTimeUtc(path)}"
-            };
+                            {
+                                FileName = Path.GetFileName(path),
+                                CreationTime = File.GetCreationTime(path),
+                                LastAccessTime = File.GetLastAccessTime(path),
+                                LastWriteTime = File.GetLastWriteTime(path),
+                                CreationTimeUtc = File.GetCreationTimeUtc(path),
+                                LastAccessTimeUtc = File.GetLastAccessTimeUtc(path),
+                                LastWriteTimeUtc = File.GetLastWriteTimeUtc(path)
+                            };
 
             return fileDates;
         }

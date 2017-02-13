@@ -3,7 +3,7 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:model="clr-namespace:ListFilesByDate.Model" TitleCharacterCasing="Normal"
-                      ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="fbd.ico"
+                      WindowStartupLocation="CenterScreen" Icon="fbd.ico"
                       Title="List Files By Date" Width="800" Height="600" ShowIconOnTitleBar="False"
                       GlowBrush="{DynamicResource AccentColorBrush}">
     <!--  RightWindowCommands  -->
@@ -115,9 +115,19 @@
                 <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="check" />
             </StackPanel>
         </Button>
-        <TextBox Name="Output" Margin="10,80,10,10" IsReadOnly="True" TextWrapping="Wrap"
+        <!--<TextBox Name="Output" Margin="10,80,10,10" IsReadOnly="True" TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto"
-                 Text="It probably will take a while until you see results. Window may be inactive." />
+                 Text="It probably will take a while until you see results. Window may be inactive." />-->
+        <DataGrid x:Name="ResultGrid" Margin="10,80,10,10" AutoGenerateColumns="False" CanUserAddRows="False"
+                  CanUserDeleteRows="False" ColumnWidth="*" SelectionUnit="FullRow"
+                  GridLinesVisibility="Horizontal" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding FileName}" Header="File Name" />
+                <DataGridTextColumn Binding="{Binding CreationTime, StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}" Header="Creation Time" />
+                <DataGridTextColumn Binding="{Binding LastWriteTime, StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}" Header="Last Write Time" />
+                <DataGridTextColumn Binding="{Binding LastAccessTime, StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}" Header="Last Access Time" />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
     <!-- Flyouts -->
     <controls:MetroWindow.Flyouts>

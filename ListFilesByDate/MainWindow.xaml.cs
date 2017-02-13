@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,8 +28,6 @@ namespace ListFilesByDate
     // ReSharper disable once RedundantExtendsListEntry
     public partial class MainWindow : MetroWindow
     {
-        private readonly BackgroundWorker _bw;
-        private string _result;
         private readonly IMetroStyle _style;
         private readonly IApplicationBasics _basics;
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
@@ -39,18 +37,20 @@ namespace ListFilesByDate
         private string _initialDirectory;
         private string _loggingPath;
         private int _overrideProtection;
+        private string _dateType;
+        private DateTime _filterDate;
+        private bool? _direction;
+
 
         public MainWindow()
         {
             _basics = new ApplicationBasics();
-
             InitializeComponent();
             _coreSettings = new CoreSettings(Properties.Settings.Default);
             var themeManagerHelper = new ThemeManagerHelper();
             _style = new MetroStyle(this, Accent, ThemeSwitch, _coreSettings, themeManagerHelper);
             _style.Load(true);
             _dialogService = new DialogService(this);
-            _bw = new BackgroundWorker();
             TaskbarItemInfo = new TaskbarItemInfo();
             ValidateForm();
             _checkFileDates = new CheckFileDates();
@@ -83,36 +83,33 @@ namespace ListFilesByDate
             _overrideProtection = 1;
         }
 
-        private void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            Output.Text = _result;
-            var message =
-                $"Files for date '{GetFilterDateTime()}' were checked." +
-                $"{Environment.NewLine}You can find the logging file at '{_loggingPath}'.";
 
-            _dialogService.ShowMessage("Completed", message);
+        private async void CheckDatesOnClick(object sender, RoutedEventArgs e)
+        {
+            await RunCheckDatesAsync();
+        }
+
+
+        private async Task RunCheckDatesAsync()
+        {
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
+            Cursor = Cursors.Wait;
+
+            _dateType = DateType.Text;
+            _filterDate = GetFilterDateTime();
+            _direction = SearchDirection.IsChecked;
+            var task = Task<ObservableCollection<FileDates>>.Factory.StartNew(CheckDates);
+            await task;
+
+            ResultGrid.ItemsSource = task.Result;
+
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
             Cursor = Cursors.Arrow;
         }
 
-        private void CheckDatesOnClick(object sender, RoutedEventArgs e)
+        private ObservableCollection<FileDates> CheckDates()
         {
-            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
-            Cursor = Cursors.Wait;
-            var dateType = DateType.Text;
-            var filterDate = GetFilterDateTime();
-            var direction = SearchDirection.IsChecked;
-            _bw.DoWork += (o, args) => CheckDates(dateType, filterDate, direction);
-            _bw.WorkerReportsProgress = true;
-            _bw.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
-            _bw.RunWorkerAsync();
-        }
-
-        private void CheckDates(string dateType, DateTime filterDate, bool? direction)
-        {
-            var outputList = new List<string>();
-            var outputBuilder = new StringBuilder();
-
+            var concurrentBag = new ConcurrentBag<FileDates>();
             var excludeExtensionList = new List<string>
                                        {
                                            "sln",
@@ -135,30 +132,20 @@ namespace ListFilesByDate
             var multiThreadingHelper = new MultiThreadingHelper();
             var filePath = new FilePath(multiThreadingHelper);
             var fileList = filePath.GetFileList(_initialDirectory, null, excludeExtensionList, null, excludeFileNameList, null, excludeFilePathList).Distinct();
-            outputBuilder.Append($"Start: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}");
 
             Parallel.ForEach(fileList,
                 file =>
                 {
                     // DateTime.Today, Time.LastWrite
-
-                    if (_checkFileDates.IsDifferent(file, dateType, filterDate, direction))
+                    if (_checkFileDates.IsDifferent(file, _dateType, _filterDate, _direction))
                     {
-                        var checkFiles = _checkFileDates.For(file);
-                        var output =
-                            $"{checkFiles.FileName}{Environment.NewLine}" +
-                            $"{checkFiles.CreationTime}{Environment.NewLine}" +
-                            $"{checkFiles.LastWriteTime}{Environment.NewLine}" +
-                            $"{checkFiles.LastAccessTime}{Environment.NewLine}{Environment.NewLine}";
-
-                        outputList.Add(output);
+                        concurrentBag.Add(_checkFileDates.For(file));
                     }
                 });
 
-            outputList.ForEach(o => outputBuilder.Append(o));
-            outputBuilder.Append($"End: {DateTime.Now}{Environment.NewLine}{Environment.NewLine}");
-            _result = outputBuilder.ToString();
-            File.AppendAllText($@"{_loggingPath}\ListFilesByDate_Log_{DateTime.Now:yyyy-MM-dd_HHmm}.txt", _result);
+            //File.AppendAllText($@"{_loggingPath}\ListFilesByDate_Log_{DateTime.Now:yyyy-MM-dd_HHmm}.txt", _result);
+
+            return new ObservableCollection<FileDates>(concurrentBag);
         }
 
         private DateTime GetFilterDateTime()
