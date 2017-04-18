@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace ListFilesByDate.Internal
 {
@@ -17,5 +18,19 @@ namespace ListFilesByDate.Internal
         public DateTime LastAccessTimeUtc { get; set; }
 
         public DateTime LastWriteTimeUtc { get; set; }
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append($"FileName: {FileName}; ");
+            stringBuilder.Append($"CreationTime: {CreationTime}; ");
+            stringBuilder.Append($"LastAccessTime: {LastAccessTime}; ");
+            stringBuilder.Append($"LastWriteTime: {LastWriteTime}; ");
+            stringBuilder.Append($"CreationTimeUtc: {CreationTimeUtc}; ");
+            stringBuilder.Append($"LastAccessTimeUtc: {LastAccessTimeUtc}; ");
+            stringBuilder.Append($"LastWriteTimeUtc: {LastWriteTimeUtc}; ");
+
+            return stringBuilder.ToString();
+        }
     }
 }

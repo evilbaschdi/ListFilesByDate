@@ -38,12 +38,16 @@
     <ApplicationIcon>fbd.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EvilBaschdi.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EvilBaschdi.Core.1.0.0.6\lib\net462\EvilBaschdi.Core.dll</HintPath>
+    <Reference Include="EvilBaschdi.Core, Version=1.1.6313.30025, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\EvilBaschdi.Core.2017.4.14.1\lib\net462\EvilBaschdi.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MahApps.Metro, Version=1.4.3.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f">
-      <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net45\MahApps.Metro.dll</HintPath>
+    <Reference Include="MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f">
+      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\MahApps.Metro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks, Version=1.9.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.1.9.0\lib\net46\MahApps.Metro.IconPacks.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -51,7 +55,7 @@
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml" />
@@ -98,10 +102,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Resources\Icons.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Commands.cs" />
@@ -128,18 +128,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\WindowsIcons-license.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Entypo-license.txt" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fbd.ico">
@@ -156,6 +149,9 @@
     <Content Include="fbd_70.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
