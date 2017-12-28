@@ -2,13 +2,15 @@
 
 namespace ListFilesByDate.Core
 {
+    /// <inheritdoc />
     public class ApplicationBasics : IApplicationBasics
     {
+        /// <inheritdoc />
         public void BrowseFolder()
         {
             var folderDialog = new FolderBrowserDialog
                                {
-                                   SelectedPath = GetInitialDirectory()
+                                   SelectedPath = InitialDirectory
                                };
 
             var result = folderDialog.ShowDialog();
@@ -21,18 +23,17 @@ namespace ListFilesByDate.Core
             Properties.Settings.Default.Save();
         }
 
-        public string GetInitialDirectory()
-        {
-            return string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory)
-                ? ""
-                : Properties.Settings.Default.InitialDirectory;
-        }
+        /// <inheritdoc />
+        public string InitialDirectory => string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory)
+            ? ""
+            : Properties.Settings.Default.InitialDirectory;
 
+        /// <inheritdoc />
         public void BrowseLoggingFolder()
         {
             var folderDialog = new FolderBrowserDialog
                                {
-                                   SelectedPath = GetLoggingPath()
+                                   SelectedPath = LoggingPath
                                };
 
             var result = folderDialog.ShowDialog();
@@ -45,11 +46,9 @@ namespace ListFilesByDate.Core
             Properties.Settings.Default.Save();
         }
 
-        public string GetLoggingPath()
-        {
-            return string.IsNullOrWhiteSpace(Properties.Settings.Default.LoggingPath)
-                ? ""
-                : Properties.Settings.Default.LoggingPath;
-        }
+        /// <inheritdoc />
+        public string LoggingPath => string.IsNullOrWhiteSpace(Properties.Settings.Default.LoggingPath)
+            ? ""
+            : Properties.Settings.Default.LoggingPath;
     }
 }

@@ -1,11 +1,19 @@
 ﻿using System;
+using EvilBaschdi.Core.DotNetExtensions;
 
 namespace ListFilesByDate.Internal
 {
-    public interface ICheckFileDates
+    /// <summary>
+    /// </summary>
+    public interface ICheckFileDates : IValueFor<string, FileDates>
     {
-        FileDates For(string path);
-
+        /// <summary>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="dateType"></param>
+        /// <param name="filter"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
         bool IsDifferent(string path, string dateType, DateTime filter, bool? direction);
     }
 }

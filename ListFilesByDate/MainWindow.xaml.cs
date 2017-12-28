@@ -29,28 +29,26 @@ namespace ListFilesByDate
     public partial class MainWindow : MetroWindow
     {
         private readonly IMetroStyle _style;
-        private readonly IApplicationBasics _basics;
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly ISettings _coreSettings;
         private readonly ICheckFileDates _checkFileDates;
-        private readonly IDialogService _dialogService;
-        private string _initialDirectory;
-        private string _loggingPath;
-        private int _overrideProtection;
+        private readonly IApplicationBasics _basics;
         private string _dateType;
+        private string _loggingPath;
+        private string _initialDirectory;
+        private int _overrideProtection;
         private DateTime _filterDate;
         private bool? _direction;
 
-
+        /// <summary>
+        ///     Constructor
+        /// </summary>
         public MainWindow()
         {
             _basics = new ApplicationBasics();
             InitializeComponent();
-            _coreSettings = new CoreSettings(Properties.Settings.Default);
-            var themeManagerHelper = new ThemeManagerHelper();
-            _style = new MetroStyle(this, Accent, ThemeSwitch, _coreSettings, themeManagerHelper);
+            ISettings coreSettings = new CoreSettings(Properties.Settings.Default);
+            IThemeManagerHelper themeManagerHelper = new ThemeManagerHelper();
+            _style = new MetroStyle(this, Accent, ThemeSwitch, coreSettings, themeManagerHelper);
             _style.Load(true);
-            _dialogService = new DialogService(this);
             TaskbarItemInfo = new TaskbarItemInfo();
             ValidateForm();
             _checkFileDates = new CheckFileDates();
@@ -66,12 +64,12 @@ namespace ListFilesByDate
             Check.IsEnabled = !string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory) &&
                               Directory.Exists(Properties.Settings.Default.InitialDirectory);
 
-            _initialDirectory = _basics.GetInitialDirectory();
+            _initialDirectory = _basics.InitialDirectory;
             InitialDirectory.Text = _initialDirectory;
 
-            _loggingPath = !string.IsNullOrWhiteSpace(_basics.GetLoggingPath())
-                ? _basics.GetLoggingPath()
-                : _basics.GetInitialDirectory();
+            _loggingPath = !string.IsNullOrWhiteSpace(_basics.LoggingPath)
+                ? _basics.LoggingPath
+                : _basics.InitialDirectory;
             LoggingPath.Text = _loggingPath;
 
             var date = Properties.Settings.Default.LastDate.Year == 0001
@@ -139,7 +137,7 @@ namespace ListFilesByDate
                     // DateTime.Today, Time.LastWrite
                     if (_checkFileDates.IsDifferent(file, _dateType, _filterDate, _direction))
                     {
-                        concurrentBag.Add(_checkFileDates.For(file));
+                        concurrentBag.Add(_checkFileDates.ValueFor(file));
                     }
                 });
 
@@ -231,15 +229,8 @@ namespace ListFilesByDate
             {
                 return;
             }
-            var routedEventArgs = e as RoutedEventArgs;
-            if (routedEventArgs != null)
-            {
-                _style.SetTheme(sender, routedEventArgs);
-            }
-            else
-            {
-                _style.SetTheme(sender);
-            }
+
+            _style.SetTheme(sender);
         }
 
         private void AccentOnSelectionChanged(object sender, SelectionChangedEventArgs e)

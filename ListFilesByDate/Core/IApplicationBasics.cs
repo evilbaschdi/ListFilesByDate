@@ -1,13 +1,23 @@
 namespace ListFilesByDate.Core
 {
+    /// <summary>
+    /// </summary>
     public interface IApplicationBasics
     {
+        /// <summary>
+        /// </summary>
         void BrowseFolder();
 
+        /// <summary>
+        /// </summary>
         void BrowseLoggingFolder();
 
-        string GetInitialDirectory();
+        /// <summary>
+        /// </summary>
+        string InitialDirectory { get; }
 
-        string GetLoggingPath();
+        /// <summary>
+        /// </summary>
+        string LoggingPath { get; }
     }
 }
