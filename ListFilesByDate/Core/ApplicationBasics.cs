@@ -1,10 +1,24 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
+using EvilBaschdi.CoreExtended.AppHelpers;
 
 namespace ListFilesByDate.Core
 {
     /// <inheritdoc />
     public class ApplicationBasics : IApplicationBasics
     {
+        private readonly IAppSettingsBase _appSettingsBase;
+
+
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        /// <param name="appSettingsBase"></param>
+        public ApplicationBasics(IAppSettingsBase appSettingsBase)
+        {
+            _appSettingsBase = appSettingsBase ?? throw new ArgumentNullException(nameof(appSettingsBase));
+        }
+
         /// <inheritdoc />
         public void BrowseFolder()
         {
@@ -19,14 +33,11 @@ namespace ListFilesByDate.Core
                 return;
             }
 
-            Properties.Settings.Default.InitialDirectory = folderDialog.SelectedPath;
-            Properties.Settings.Default.Save();
+            _appSettingsBase.Set("InitialDirectory", folderDialog.SelectedPath);
         }
 
         /// <inheritdoc />
-        public string InitialDirectory => string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory)
-            ? ""
-            : Properties.Settings.Default.InitialDirectory;
+        public string InitialDirectory => _appSettingsBase.Get<string>("InitialDirectory");
 
         /// <inheritdoc />
         public void BrowseLoggingFolder()
@@ -42,13 +53,10 @@ namespace ListFilesByDate.Core
                 return;
             }
 
-            Properties.Settings.Default.LoggingPath = folderDialog.SelectedPath;
-            Properties.Settings.Default.Save();
+            _appSettingsBase.Set("LoggingPath", folderDialog.SelectedPath);
         }
 
         /// <inheritdoc />
-        public string LoggingPath => string.IsNullOrWhiteSpace(Properties.Settings.Default.LoggingPath)
-            ? ""
-            : Properties.Settings.Default.LoggingPath;
+        public string LoggingPath => _appSettingsBase.Get<string>("LoggingPath");
     }
 }

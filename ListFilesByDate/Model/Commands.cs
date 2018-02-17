@@ -2,6 +2,8 @@
 
 namespace ListFilesByDate.Model
 {
+    /// <summary>
+    /// </summary>
     public class Commands
     {
         /// <summary>

@@ -11,12 +11,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
-using EvilBaschdi.Core.Application;
-using EvilBaschdi.Core.DirectoryExtensions;
-using EvilBaschdi.Core.Threading;
-using EvilBaschdi.Core.Wpf;
+using EvilBaschdi.Core.Extensions;
+using EvilBaschdi.Core.Internal;
+using EvilBaschdi.Core.Model;
+using EvilBaschdi.CoreExtended.AppHelpers;
+using EvilBaschdi.CoreExtended.Metro;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
+using ListFilesByDate.Model;
+using ListFilesByDate.Properties;
 using MahApps.Metro.Controls;
 using Calendar = System.Windows.Controls.Calendar;
 
@@ -28,9 +31,10 @@ namespace ListFilesByDate
     // ReSharper disable once RedundantExtendsListEntry
     public partial class MainWindow : MetroWindow
     {
-        private readonly IMetroStyle _style;
+        private readonly IApplicationStyle _applicationStyle;
         private readonly ICheckFileDates _checkFileDates;
         private readonly IApplicationBasics _basics;
+        private readonly IAppSettingsBase _appSettingsBase;
         private string _dateType;
         private string _loggingPath;
         private string _initialDirectory;
@@ -43,12 +47,13 @@ namespace ListFilesByDate
         /// </summary>
         public MainWindow()
         {
-            _basics = new ApplicationBasics();
+            _appSettingsBase = new AppSettingsBase(Settings.Default);
+            _basics = new ApplicationBasics(_appSettingsBase);
             InitializeComponent();
-            ISettings coreSettings = new CoreSettings(Properties.Settings.Default);
+            IApplicationStyleSettings applicationStyleSettings = new ApplicationStyleSettings(_appSettingsBase);
             IThemeManagerHelper themeManagerHelper = new ThemeManagerHelper();
-            _style = new MetroStyle(this, Accent, ThemeSwitch, coreSettings, themeManagerHelper);
-            _style.Load(true);
+            _applicationStyle = new ApplicationStyle(this, Accent, ThemeSwitch, applicationStyleSettings, themeManagerHelper);
+            _applicationStyle.Load(true);
             TaskbarItemInfo = new TaskbarItemInfo();
             ValidateForm();
             _checkFileDates = new CheckFileDates();
@@ -61,8 +66,8 @@ namespace ListFilesByDate
         {
             var linkerTime = Assembly.GetExecutingAssembly().GetLinkerTime();
             LinkerTime.Content = linkerTime.ToString(CultureInfo.InvariantCulture);
-            Check.IsEnabled = !string.IsNullOrWhiteSpace(Properties.Settings.Default.InitialDirectory) &&
-                              Directory.Exists(Properties.Settings.Default.InitialDirectory);
+            Check.IsEnabled = !string.IsNullOrWhiteSpace(_appSettingsBase.Get<string>("InitialDirectory")) &&
+                              Directory.Exists(_appSettingsBase.Get<string>("InitialDirectory"));
 
             _initialDirectory = _basics.InitialDirectory;
             InitialDirectory.Text = _initialDirectory;
@@ -72,9 +77,10 @@ namespace ListFilesByDate
                 : _basics.InitialDirectory;
             LoggingPath.Text = _loggingPath;
 
-            var date = Properties.Settings.Default.LastDate.Year == 0001
+            var lastDate = _appSettingsBase.Get<DateTime>("LastDate");
+            var date = lastDate.Year == 0001
                 ? DateTime.Now
-                : Properties.Settings.Default.LastDate;
+                : lastDate;
             FilterDate.SelectedDate = date.Date;
             FilterHour.Value = date.Hour;
             FilterMinute.Value = date.Minute;
@@ -127,9 +133,15 @@ namespace ListFilesByDate
                                           ".git"
                                       };
 
-            var multiThreadingHelper = new MultiThreadingHelper();
-            var filePath = new FilePath(multiThreadingHelper);
-            var fileList = filePath.GetFileList(_initialDirectory, null, excludeExtensionList, null, excludeFileNameList, null, excludeFilePathList).Distinct();
+            var multiThreadingHelper = new MultiThreading();
+            var filePath = new FileListFromPath(multiThreadingHelper);
+            var filePathFilter = new FileListFromPathFilter
+                                 {
+                                     FilterExtensionsNotToEqual = excludeExtensionList,
+                                     FilterFileNamesNotToEqual = excludeFileNameList,
+                                     FilterFilePathsToEqual = excludeFilePathList
+                                 };
+            var fileList = filePath.ValueFor(_initialDirectory, filePathFilter).Distinct();
 
             Parallel.ForEach(fileList,
                 file =>
@@ -159,8 +171,8 @@ namespace ListFilesByDate
         private void BrowseClick(object sender, RoutedEventArgs e)
         {
             _basics.BrowseFolder();
-            InitialDirectory.Text = Properties.Settings.Default.InitialDirectory;
-            _initialDirectory = Properties.Settings.Default.InitialDirectory;
+            InitialDirectory.Text = _appSettingsBase.Get<string>("InitialDirectory");
+            _initialDirectory = _appSettingsBase.Get<string>("InitialDirectory");
             ValidateForm();
         }
 
@@ -168,10 +180,10 @@ namespace ListFilesByDate
         {
             if (Directory.Exists(InitialDirectory.Text))
             {
-                Properties.Settings.Default.InitialDirectory = InitialDirectory.Text;
-                Properties.Settings.Default.Save();
-                _initialDirectory = Properties.Settings.Default.InitialDirectory;
+                _appSettingsBase.Set("InitialDirectory", InitialDirectory.Text);
+                _initialDirectory = _appSettingsBase.Get<string>("InitialDirectory");
             }
+
             ValidateForm();
         }
 
@@ -220,7 +232,8 @@ namespace ListFilesByDate
             {
                 return;
             }
-            _style.SaveStyle();
+
+            _applicationStyle.SaveStyle();
         }
 
         private void Theme(object sender, EventArgs e)
@@ -230,7 +243,7 @@ namespace ListFilesByDate
                 return;
             }
 
-            _style.SetTheme(sender);
+            _applicationStyle.SetTheme(sender);
         }
 
         private void AccentOnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -239,7 +252,8 @@ namespace ListFilesByDate
             {
                 return;
             }
-            _style.SetAccent(sender, e);
+
+            _applicationStyle.SetAccent(sender, e);
         }
 
         #endregion MetroStyle
@@ -249,8 +263,8 @@ namespace ListFilesByDate
         private void BrowseLoggingPathClick(object sender, RoutedEventArgs e)
         {
             _basics.BrowseLoggingFolder();
-            LoggingPath.Text = Properties.Settings.Default.LoggingPath;
-            _loggingPath = Properties.Settings.Default.LoggingPath;
+            LoggingPath.Text = _appSettingsBase.Get<string>("LoggingPath");
+            _loggingPath = _appSettingsBase.Get<string>("LoggingPath");
             ValidateForm();
         }
 
@@ -258,10 +272,10 @@ namespace ListFilesByDate
         {
             if (Directory.Exists(LoggingPath.Text))
             {
-                Properties.Settings.Default.LoggingPath = LoggingPath.Text;
-                Properties.Settings.Default.Save();
-                _loggingPath = Properties.Settings.Default.LoggingPath;
+                _appSettingsBase.Set("LoggingPath", LoggingPath.Text);
+                _loggingPath = _appSettingsBase.Get<string>("LoggingPath");
             }
+
             ValidateForm();
         }
 

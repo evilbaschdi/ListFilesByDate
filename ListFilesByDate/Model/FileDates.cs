@@ -1,33 +1,47 @@
 using System;
 using System.Text;
 
-namespace ListFilesByDate.Internal
+namespace ListFilesByDate.Model
 {
-    /// <inheritdoc />
-    public class FileDates : IFileDates
+    /// <summary>
+    /// </summary>
+    public class FileDates
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
         public string FileName { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
+
         public DateTime CreationTime { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
         public DateTime LastAccessTime { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
+
         public DateTime LastWriteTime { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
         public DateTime CreationTimeUtc { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
+
         public DateTime LastAccessTimeUtc { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
+
         public DateTime LastWriteTimeUtc { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             var stringBuilder = new StringBuilder();

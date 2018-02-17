@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ListFilesByDate.Model;
 
 namespace ListFilesByDate.Internal
 {
@@ -13,6 +14,7 @@ namespace ListFilesByDate.Internal
             {
                 throw new ArgumentNullException(nameof(path));
             }
+
             if (dateType == null)
             {
                 throw new ArgumentNullException(nameof(dateType));
@@ -34,10 +36,12 @@ namespace ListFilesByDate.Internal
                     fileDate = File.GetLastWriteTime(path);
                     break;
             }
+
             if (direction == true)
             {
                 return fileDate < filter;
             }
+
             return fileDate > filter;
         }
 
@@ -48,6 +52,7 @@ namespace ListFilesByDate.Internal
             {
                 throw new ArgumentNullException(nameof(path));
             }
+
             var fileDates = new FileDates
                             {
                                 FileName = Path.GetFileName(path),
