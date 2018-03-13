@@ -101,7 +101,7 @@
                  VerticalScrollBarVisibility="Auto"
                  Text="It probably will take a while until you see results. Window may be inactive." />-->
         <DataGrid x:Name="ResultGrid" Margin="10,80,10,10" AutoGenerateColumns="False" CanUserAddRows="False"
-                  CanUserDeleteRows="False" ColumnWidth="*" SelectionUnit="FullRow"
+                  CanUserDeleteRows="False" ColumnWidth="*" SelectionUnit="FullRow" Style="{DynamicResource AzureDataGrid}"
                   GridLinesVisibility="Horizontal" IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding FileName}" Header="File Name" />
