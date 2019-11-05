@@ -2,26 +2,25 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
-using EvilBaschdi.Core.Extensions;
 using EvilBaschdi.Core.Internal;
 using EvilBaschdi.Core.Model;
 using EvilBaschdi.CoreExtended.AppHelpers;
 using EvilBaschdi.CoreExtended.Metro;
+using EvilBaschdi.CoreExtended.Mvvm;
+using EvilBaschdi.CoreExtended.Mvvm.View;
+using EvilBaschdi.CoreExtended.Mvvm.ViewModel;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
 using ListFilesByDate.Model;
 using ListFilesByDate.Properties;
 using MahApps.Metro.Controls;
-using Calendar = System.Windows.Controls.Calendar;
 
 namespace ListFilesByDate
 {
@@ -32,15 +31,16 @@ namespace ListFilesByDate
     public partial class MainWindow : MetroWindow
     {
         private readonly IApplicationStyle _applicationStyle;
-        private readonly ICheckFileDates _checkFileDates;
-        private readonly IApplicationBasics _basics;
         private readonly IAppSettingsBase _appSettingsBase;
+        private readonly IApplicationBasics _basics;
+        private readonly ICheckFileDates _checkFileDates;
+        private readonly IThemeManagerHelper _themeManagerHelper;
         private string _dateType;
-        private string _loggingPath;
-        private string _initialDirectory;
-        private int _overrideProtection;
-        private DateTime _filterDate;
         private bool? _direction;
+        private DateTime _filterDate;
+        private string _initialDirectory;
+        private string _loggingPath;
+        private int _overrideProtection;
 
         /// <summary>
         ///     Constructor
@@ -50,9 +50,8 @@ namespace ListFilesByDate
             _appSettingsBase = new AppSettingsBase(Settings.Default);
             _basics = new ApplicationBasics(_appSettingsBase);
             InitializeComponent();
-            IApplicationStyleSettings applicationStyleSettings = new ApplicationStyleSettings(_appSettingsBase);
-            IThemeManagerHelper themeManagerHelper = new ThemeManagerHelper();
-            _applicationStyle = new ApplicationStyle(this, Accent, ThemeSwitch, applicationStyleSettings, themeManagerHelper);
+            _themeManagerHelper = new ThemeManagerHelper();
+            _applicationStyle = new ApplicationStyle(_themeManagerHelper);
             _applicationStyle.Load(true);
             TaskbarItemInfo = new TaskbarItemInfo();
             ValidateForm();
@@ -64,8 +63,6 @@ namespace ListFilesByDate
         //todo: Logging
         private void ValidateForm()
         {
-            var linkerTime = Assembly.GetExecutingAssembly().GetLinkerTime();
-            LinkerTime.Content = linkerTime.ToString(CultureInfo.InvariantCulture);
             Check.IsEnabled = !string.IsNullOrWhiteSpace(_appSettingsBase.Get<string>("InitialDirectory")) &&
                               Directory.Exists(_appSettingsBase.Get<string>("InitialDirectory"));
 
@@ -166,6 +163,19 @@ namespace ListFilesByDate
                 Convert.ToInt32(FilterMinute.Value), 0);
         }
 
+        private void AboutWindowClick(object sender, RoutedEventArgs e)
+        {
+            var assembly = typeof(MainWindow).Assembly;
+            IAboutWindowContent aboutWindowContent = new AboutWindowContent(assembly, $@"{AppDomain.CurrentDomain.BaseDirectory}\fbd_512.png");
+
+            var aboutWindow = new AboutWindow
+                              {
+                                  DataContext = new AboutViewModel(aboutWindowContent, _themeManagerHelper)
+                              };
+
+            aboutWindow.ShowDialog();
+        }
+
         #region Initial Directory
 
         private void BrowseClick(object sender, RoutedEventArgs e)
@@ -224,39 +234,6 @@ namespace ListFilesByDate
 
         #endregion Flyout
 
-        #region MetroStyle
-
-        private void SaveStyleClick(object sender, RoutedEventArgs e)
-        {
-            if (_overrideProtection == 0)
-            {
-                return;
-            }
-
-            _applicationStyle.SaveStyle();
-        }
-
-        private void Theme(object sender, EventArgs e)
-        {
-            if (_overrideProtection == 0)
-            {
-                return;
-            }
-
-            _applicationStyle.SetTheme(sender);
-        }
-
-        private void AccentOnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_overrideProtection == 0)
-            {
-                return;
-            }
-
-            _applicationStyle.SetAccent(sender, e);
-        }
-
-        #endregion MetroStyle
 
         #region Check Settings
 
