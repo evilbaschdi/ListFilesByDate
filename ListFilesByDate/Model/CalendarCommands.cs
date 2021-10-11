@@ -4,10 +4,10 @@ namespace ListFilesByDate.Model
 {
     /// <summary>
     /// </summary>
-    public class Commands
+    public class CalendarCommands
     {
         /// <summary>
         /// </summary>
-        public static readonly RoutedCommand SelectToday = new RoutedCommand("Today", typeof(Commands));
+        public static readonly RoutedCommand SelectToday = new("Today", typeof(CalendarCommands));
     }
 }

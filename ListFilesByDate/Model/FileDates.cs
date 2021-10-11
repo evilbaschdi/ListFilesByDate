@@ -9,35 +9,35 @@ namespace ListFilesByDate.Model
     {
         /// <summary>
         /// </summary>
-        public string FileName { get; set; }
+
+        public DateTime CreationTime { get; init; }
+
+        /// <summary>
+        /// </summary>
+        public DateTime CreationTimeUtc { get; init; }
+
+        /// <summary>
+        /// </summary>
+        public string FileName { get; init; }
+
+        /// <summary>
+        /// </summary>
+        public DateTime LastAccessTime { get; init; }
 
         /// <summary>
         /// </summary>
 
-        public DateTime CreationTime { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public DateTime LastAccessTime { get; set; }
+        public DateTime LastAccessTimeUtc { get; init; }
 
         /// <summary>
         /// </summary>
 
-        public DateTime LastWriteTime { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public DateTime CreationTimeUtc { get; set; }
+        public DateTime LastWriteTime { get; init; }
 
         /// <summary>
         /// </summary>
 
-        public DateTime LastAccessTimeUtc { get; set; }
-
-        /// <summary>
-        /// </summary>
-
-        public DateTime LastWriteTimeUtc { get; set; }
+        public DateTime LastWriteTimeUtc { get; init; }
 
         /// <summary>
         /// </summary>

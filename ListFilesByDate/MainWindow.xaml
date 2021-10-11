@@ -14,8 +14,8 @@
             <!--  Settings  -->
             <Button Click="ToggleSettingsFlyoutClick">
                 <StackPanel Orientation="Horizontal">
-                    <iconPacks:PackIconMaterial Kind="Settings" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    <TextBlock Margin="5 0 0 0" VerticalAlignment="Center" Text="Settings" />
+                    <iconPacks:PackIconMaterialDesign Kind="Settings" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Margin="5 0 0 0" VerticalAlignment="Center" Text="settings" />
                 </StackPanel>
             </Button>
             <Button Click="AboutWindowClick">
@@ -37,8 +37,8 @@
         <DatePicker Name="FilterDate" Height="30" Margin="50,10,0,0" VerticalAlignment="Top" IsTodayHighlighted="True" HorizontalAlignment="Left" Width="115"
                     SelectedDateFormat="Short">
             <DatePicker.CommandBindings>
-                <CommandBinding CanExecute="CommandBindingCanExecute" Executed="CommandBindingExecuted">
-                    <CommandBinding.Command>model:Commands.SelectToday</CommandBinding.Command>
+                <CommandBinding CanExecute="CommandBindingCanExecute" Executed="CommandBindingExecuted" Command="model:CalendarCommands.SelectToday">
+                    <!--<CommandBinding.Command>model:CalendarCommands.SelectToday</CommandBinding.Command>-->
                 </CommandBinding>
             </DatePicker.CommandBindings>
             <DatePicker.CalendarStyle>
@@ -49,9 +49,12 @@
                                 <StackPanel Name="PART_Root" HorizontalAlignment="Center">
                                     <CalendarItem Name="PART_CalendarItem" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}"
                                                   BorderThickness="{TemplateBinding Control.BorderThickness}" Style="{TemplateBinding Calendar.CalendarItemStyle}" />
-                                    <Button Content="Today"
+                                    <Button Command="model:CalendarCommands.SelectToday"
                                             CommandParameter="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}}">
-                                        <Button.Command>model:Commands.SelectToday</Button.Command>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconModern Kind="CalendarDay" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Margin="5 0 0 0" VerticalAlignment="Center" Text="Today" />
+                                        </StackPanel>
                                     </Button>
                                 </StackPanel>
                             </ControlTemplate>
@@ -73,9 +76,7 @@
         </ComboBox>
         <!--  Search Direction  -->
         <controls:ToggleSwitch Name="SearchDirection" Margin="0,10,110,0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="105" Height="30"
-                               OnSwitchBrush="{DynamicResource MahApps.Brushes.AccentBase}" OnLabel="older" OffSwitchBrush="{DynamicResource MahApps.Brushes.AccentBase}"
-                               OffLabel="newer"
-                               FontSize="12" FontFamily="Segoe UI Semibold, Segoe UI, Lucida Sans Unicode, Verdana" />
+                               OnContent="older" OffContent="newer" FontSize="12" FontFamily="Segoe UI Semibold, Segoe UI, Lucida Sans Unicode, Verdana" />
         <!-- Save -->
         <Button Name="Save" Width="100" Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Top"
                 Click="BrowseClick">
@@ -125,10 +126,6 @@
             <controls:Flyout Name="SettingsFlyout" Width="600" AnimateOnPositionChange="True" AnimateOpacity="True"
                              Header="Settings" Position="Right" Theme="Accent">
                 <StackPanel>
-                    <!-- Line -->
-                    <StackPanel Margin="0,10,0,0" Orientation="Vertical">
-                        <Rectangle Width="570" VerticalAlignment="Stretch" Stroke="{DynamicResource MahApps.Brushes.AccentBase}" />
-                    </StackPanel>
                     <StackPanel>
                         <!-- Logging -->
                         <StackPanel Margin="10,5,0,0" Orientation="Horizontal">

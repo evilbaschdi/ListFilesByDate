@@ -11,11 +11,9 @@ using System.Windows.Input;
 using System.Windows.Shell;
 using EvilBaschdi.Core.Internal;
 using EvilBaschdi.Core.Model;
+using EvilBaschdi.CoreExtended;
 using EvilBaschdi.CoreExtended.AppHelpers;
-using EvilBaschdi.CoreExtended.Metro;
-using EvilBaschdi.CoreExtended.Mvvm;
-using EvilBaschdi.CoreExtended.Mvvm.View;
-using EvilBaschdi.CoreExtended.Mvvm.ViewModel;
+using EvilBaschdi.CoreExtended.Controls.About;
 using ListFilesByDate.Core;
 using ListFilesByDate.Internal;
 using ListFilesByDate.Model;
@@ -30,17 +28,16 @@ namespace ListFilesByDate
     // ReSharper disable once RedundantExtendsListEntry
     public partial class MainWindow : MetroWindow
     {
-        private readonly IApplicationStyle _applicationStyle;
         private readonly IAppSettingsBase _appSettingsBase;
         private readonly IApplicationBasics _basics;
         private readonly ICheckFileDates _checkFileDates;
-        private readonly IThemeManagerHelper _themeManagerHelper;
+        private readonly IRoundCorners _roundCorners;
+
         private string _dateType;
         private bool? _direction;
         private DateTime _filterDate;
         private string _initialDirectory;
         private string _loggingPath;
-        private int _overrideProtection;
 
         /// <summary>
         ///     Constructor
@@ -50,10 +47,12 @@ namespace ListFilesByDate
             _appSettingsBase = new AppSettingsBase(Settings.Default);
             _basics = new ApplicationBasics(_appSettingsBase);
             InitializeComponent();
-            _themeManagerHelper = new ThemeManagerHelper();
-            _applicationStyle = new ApplicationStyle(_themeManagerHelper);
-            _applicationStyle.Load(true);
-            TaskbarItemInfo = new TaskbarItemInfo();
+
+            _roundCorners = new RoundCorners();
+            IApplicationStyle style = new ApplicationStyle(_roundCorners, true);
+            style.Run();
+
+            TaskbarItemInfo = new();
             ValidateForm();
             _checkFileDates = new CheckFileDates();
         }
@@ -63,8 +62,8 @@ namespace ListFilesByDate
         //todo: Logging
         private void ValidateForm()
         {
-            Check.IsEnabled = !string.IsNullOrWhiteSpace(_appSettingsBase.Get<string>("InitialDirectory")) &&
-                              Directory.Exists(_appSettingsBase.Get<string>("InitialDirectory"));
+            Check.IsEnabled = !string.IsNullOrWhiteSpace(_appSettingsBase.Get("InitialDirectory", Path.GetTempPath())) &&
+                              Directory.Exists(_appSettingsBase.Get("InitialDirectory", Path.GetTempPath()));
 
             _initialDirectory = _basics.InitialDirectory;
             InitialDirectory.Text = _initialDirectory;
@@ -81,7 +80,6 @@ namespace ListFilesByDate
             FilterDate.SelectedDate = date.Date;
             FilterHour.Value = date.Hour;
             FilterMinute.Value = date.Minute;
-            _overrideProtection = 1;
         }
 
 
@@ -98,7 +96,7 @@ namespace ListFilesByDate
 
             _dateType = DateType.Text;
             _filterDate = GetFilterDateTime();
-            _direction = SearchDirection.IsChecked;
+            _direction = SearchDirection.IsOn;
             var task = Task<ObservableCollection<FileDates>>.Factory.StartNew(CheckDates);
             await task;
 
@@ -130,15 +128,14 @@ namespace ListFilesByDate
                                           ".git"
                                       };
 
-            var multiThreadingHelper = new MultiThreading();
-            var filePath = new FileListFromPath(multiThreadingHelper);
+            var filePath = new FileListFromPath();
             var filePathFilter = new FileListFromPathFilter
                                  {
                                      FilterExtensionsNotToEqual = excludeExtensionList,
                                      FilterFileNamesNotToEqual = excludeFileNameList,
                                      FilterFilePathsToEqual = excludeFilePathList
                                  };
-            var fileList = filePath.ValueFor(_initialDirectory, filePathFilter).Distinct();
+            var fileList = filePath.ValueFor(_initialDirectory.ToLower(), filePathFilter).Distinct();
 
             Parallel.ForEach(fileList,
                 file =>
@@ -152,25 +149,25 @@ namespace ListFilesByDate
 
             //File.AppendAllText($@"{_loggingPath}\ListFilesByDate_Log_{DateTime.Now:yyyy-MM-dd_HHmm}.txt", _result);
 
-            return new ObservableCollection<FileDates>(concurrentBag);
+            return new(concurrentBag);
         }
 
         private DateTime GetFilterDateTime()
         {
             // ReSharper disable once PossibleInvalidOperationException
             var filterDate = FilterDate.SelectedDate.Value;
-            return new DateTime(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
+            return new(filterDate.Year, filterDate.Month, filterDate.Day, Convert.ToInt32(FilterHour.Value),
                 Convert.ToInt32(FilterMinute.Value), 0);
         }
 
         private void AboutWindowClick(object sender, RoutedEventArgs e)
         {
             var assembly = typeof(MainWindow).Assembly;
-            IAboutWindowContent aboutWindowContent = new AboutWindowContent(assembly, $@"{AppDomain.CurrentDomain.BaseDirectory}\fbd_512.png");
+            IAboutContent aboutWindowContent = new AboutContent(assembly, $@"{AppDomain.CurrentDomain.BaseDirectory}\fbd_512.png");
 
             var aboutWindow = new AboutWindow
                               {
-                                  DataContext = new AboutViewModel(aboutWindowContent, _themeManagerHelper)
+                                  DataContext = new AboutViewModel(aboutWindowContent, _roundCorners)
                               };
 
             aboutWindow.ShowDialog();
@@ -181,8 +178,8 @@ namespace ListFilesByDate
         private void BrowseClick(object sender, RoutedEventArgs e)
         {
             _basics.BrowseFolder();
-            InitialDirectory.Text = _appSettingsBase.Get<string>("InitialDirectory");
-            _initialDirectory = _appSettingsBase.Get<string>("InitialDirectory");
+            InitialDirectory.Text = _appSettingsBase.Get("InitialDirectory", Path.GetTempPath());
+            _initialDirectory = _appSettingsBase.Get("InitialDirectory", Path.GetTempPath());
             ValidateForm();
         }
 
@@ -191,7 +188,7 @@ namespace ListFilesByDate
             if (Directory.Exists(InitialDirectory.Text))
             {
                 _appSettingsBase.Set("InitialDirectory", InitialDirectory.Text);
-                _initialDirectory = _appSettingsBase.Get<string>("InitialDirectory");
+                _initialDirectory = _appSettingsBase.Get("InitialDirectory", Path.GetTempPath());
             }
 
             ValidateForm();
@@ -208,7 +205,7 @@ namespace ListFilesByDate
 
         private void ToggleFlyout(int index, bool stayOpen = false)
         {
-            var activeFlyout = (Flyout) Flyouts.Items[index];
+            var activeFlyout = (Flyout)Flyouts.Items[index];
             if (activeFlyout == null)
             {
                 return;
@@ -240,8 +237,8 @@ namespace ListFilesByDate
         private void BrowseLoggingPathClick(object sender, RoutedEventArgs e)
         {
             _basics.BrowseLoggingFolder();
-            LoggingPath.Text = _appSettingsBase.Get<string>("LoggingPath");
-            _loggingPath = _appSettingsBase.Get<string>("LoggingPath");
+            LoggingPath.Text = _appSettingsBase.Get("LoggingPath", Path.GetTempPath());
+            _loggingPath = _appSettingsBase.Get("LoggingPath", Path.GetTempPath());
             ValidateForm();
         }
 
@@ -250,7 +247,7 @@ namespace ListFilesByDate
             if (Directory.Exists(LoggingPath.Text))
             {
                 _appSettingsBase.Set("LoggingPath", LoggingPath.Text);
-                _loggingPath = _appSettingsBase.Get<string>("LoggingPath");
+                _loggingPath = _appSettingsBase.Get("LoggingPath", Path.GetTempPath());
             }
 
             ValidateForm();
@@ -267,7 +264,7 @@ namespace ListFilesByDate
 
         private void CommandBindingExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            ((Calendar) e.Parameter).SelectedDate = DateTime.Now.Date;
+            ((Calendar)e.Parameter).SelectedDate = DateTime.Now.Date;
         }
 
         #endregion Choose Date

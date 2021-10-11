@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using EvilBaschdi.CoreExtended.AppHelpers;
 
@@ -37,7 +38,7 @@ namespace ListFilesByDate.Core
         }
 
         /// <inheritdoc />
-        public string InitialDirectory => _appSettingsBase.Get<string>("InitialDirectory");
+        public string InitialDirectory => _appSettingsBase.Get("InitialDirectory", Path.GetTempPath());
 
         /// <inheritdoc />
         public void BrowseLoggingFolder()
@@ -57,6 +58,6 @@ namespace ListFilesByDate.Core
         }
 
         /// <inheritdoc />
-        public string LoggingPath => _appSettingsBase.Get<string>("LoggingPath");
+        public string LoggingPath => _appSettingsBase.Get("LoggingPath", Path.GetTempPath());
     }
 }

@@ -1,18 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ListFilesByDate</RootNamespace>
     <AssemblyName>ListFilesByDate</AssemblyName>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <Authors>Sebastian Walter</Authors>
     <Company>evilbaschdi (Sebastian Walter)</Company>
-    <Version>$([System.DateTime]::UtcNow.ToString(yyyy.M.d.Hmm))-develop</Version>
+    <Version>$([System.DateTime]::UtcNow.ToString(yyyy.M.d.Hmm))</Version>
     <Copyright>Copyright © 2015 - $([System.DateTime]::UtcNow.ToString(yyyy)) evilbaschdi</Copyright>
   </PropertyGroup>
   <PropertyGroup>
@@ -20,6 +20,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>ListFilesByDate.App</StartupObject>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <AppDesigner Include="Properties\" />
@@ -47,13 +48,16 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ControlzEx" Version="4.1.1" />
-    <PackageReference Include="MahApps.Metro" Version="2.0.0-alpha0531" />
-    <PackageReference Include="MahApps.Metro.IconPacks" Version="3.0.0-alpha0258" />
-    <PackageReference Include="EvilBaschdi.Core" Version="2019.10.10.1115-develop" />
-    <PackageReference Include="EvilBaschdi.CoreExtended" Version="2019.10.21.1930-develop" />
+    <PackageReference Include="ControlzEx" Version="5.0.1" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.7" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.10.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign" Version="4.10.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Modern" Version="4.10.0" />
+    <PackageReference Include="EvilBaschdi.Core" Version="2021.10.11.609-develop" />
+    <PackageReference Include="EvilBaschdi.CoreExtended" Version="2021.9.28.1631-develop" />
 
   </ItemGroup>
+
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -61,11 +65,13 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
+
   <ItemGroup>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
 
 </Project>
