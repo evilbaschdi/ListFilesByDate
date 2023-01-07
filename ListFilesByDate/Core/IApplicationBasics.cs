@@ -1,23 +1,22 @@
-namespace ListFilesByDate.Core
+namespace ListFilesByDate.Core;
+
+/// <summary>
+/// </summary>
+public interface IApplicationBasics
 {
     /// <summary>
     /// </summary>
-    public interface IApplicationBasics
-    {
-        /// <summary>
-        /// </summary>
-        string InitialDirectory { get; }
+    string InitialDirectory { get; set; }
 
-        /// <summary>
-        /// </summary>
-        string LoggingPath { get; }
+    /// <summary>
+    /// </summary>
+    string LoggingPath { get; set; }
 
-        /// <summary>
-        /// </summary>
-        void BrowseFolder();
+    /// <summary>
+    /// </summary>
+    void BrowseFolder();
 
-        /// <summary>
-        /// </summary>
-        void BrowseLoggingFolder();
-    }
+    /// <summary>
+    /// </summary>
+    void BrowseLoggingFolder();
 }

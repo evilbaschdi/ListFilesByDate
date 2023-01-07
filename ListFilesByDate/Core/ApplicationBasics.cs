@@ -1,63 +1,67 @@
-﻿using System;
-using System.IO;
-using System.Windows.Forms;
-using EvilBaschdi.CoreExtended.AppHelpers;
+﻿using EvilBaschdi.Settings.ByMachineAndUser;
+using JetBrains.Annotations;
 
-namespace ListFilesByDate.Core
+namespace ListFilesByDate.Core;
+
+/// <inheritdoc />
+public class ApplicationBasics : IApplicationBasics
 {
-    /// <inheritdoc />
-    public class ApplicationBasics : IApplicationBasics
+    private readonly IAppSettingByKey _appSettingByKey;
+
+    /// <summary>
+    ///     Constructor
+    /// </summary>
+    /// <param name="appSettingByKey"></param>
+    public ApplicationBasics([NotNull] IAppSettingByKey appSettingByKey)
     {
-        private readonly IAppSettingsBase _appSettingsBase;
+        _appSettingByKey = appSettingByKey ?? throw new ArgumentNullException(nameof(appSettingByKey));
+    }
 
+    /// <inheritdoc />
+    public void BrowseFolder()
+    {
+        var folderDialog = new FolderBrowserDialog
+                           {
+                               SelectedPath = InitialDirectory
+                           };
 
-        /// <summary>
-        ///     Constructor
-        /// </summary>
-        /// <param name="appSettingsBase"></param>
-        public ApplicationBasics(IAppSettingsBase appSettingsBase)
+        var result = folderDialog.ShowDialog();
+        if (result.ToString() != "OK")
         {
-            _appSettingsBase = appSettingsBase ?? throw new ArgumentNullException(nameof(appSettingsBase));
+            return;
         }
 
-        /// <inheritdoc />
-        public void BrowseFolder()
+        _appSettingByKey.RunFor("InitialDirectory", folderDialog.SelectedPath);
+    }
+
+    /// <inheritdoc />
+    public string InitialDirectory
+    {
+        get => _appSettingByKey.ValueFor("InitialDirectory");
+        set => _appSettingByKey.RunFor("InitialDirectory", value);
+    }
+
+    /// <inheritdoc />
+    public void BrowseLoggingFolder()
+    {
+        var folderDialog = new FolderBrowserDialog
+                           {
+                               SelectedPath = LoggingPath
+                           };
+
+        var result = folderDialog.ShowDialog();
+        if (result.ToString() != "OK")
         {
-            var folderDialog = new FolderBrowserDialog
-                               {
-                                   SelectedPath = InitialDirectory
-                               };
-
-            var result = folderDialog.ShowDialog();
-            if (result.ToString() != "OK")
-            {
-                return;
-            }
-
-            _appSettingsBase.Set("InitialDirectory", folderDialog.SelectedPath);
+            return;
         }
 
-        /// <inheritdoc />
-        public string InitialDirectory => _appSettingsBase.Get("InitialDirectory", Path.GetTempPath());
+        _appSettingByKey.RunFor("LoggingPath", folderDialog.SelectedPath);
+    }
 
-        /// <inheritdoc />
-        public void BrowseLoggingFolder()
-        {
-            var folderDialog = new FolderBrowserDialog
-                               {
-                                   SelectedPath = LoggingPath
-                               };
-
-            var result = folderDialog.ShowDialog();
-            if (result.ToString() != "OK")
-            {
-                return;
-            }
-
-            _appSettingsBase.Set("LoggingPath", folderDialog.SelectedPath);
-        }
-
-        /// <inheritdoc />
-        public string LoggingPath => _appSettingsBase.Get("LoggingPath", Path.GetTempPath());
+    /// <inheritdoc />
+    public string LoggingPath
+    {
+        get => _appSettingByKey.ValueFor("LoggingPath");
+        set => _appSettingByKey.RunFor("LoggingPath", value);
     }
 }

@@ -6,8 +6,7 @@
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                       TitleCharacterCasing="Normal"
                       WindowStartupLocation="CenterScreen" Icon="fbd.ico"
-                      Title="List Files By Date" Width="800" Height="600" ShowIconOnTitleBar="False"
-                      GlowBrush="{DynamicResource MahApps.Brushes.AccentBase}">
+                      Title="List Files By Date" Width="800" Height="600" ShowIconOnTitleBar="False">
     <!--  RightWindowCommands  -->
     <controls:MetroWindow.RightWindowCommands>
         <controls:WindowCommands>
@@ -124,7 +123,7 @@
         <controls:FlyoutsControl>
             <!-- Settings Flyout -->
             <controls:Flyout Name="SettingsFlyout" Width="600" AnimateOnPositionChange="True" AnimateOpacity="True"
-                             Header="Settings" Position="Right" Theme="Accent">
+                             Header="Settings" Position="Right" Theme="Adapt">
                 <StackPanel>
                     <StackPanel>
                         <!-- Logging -->
