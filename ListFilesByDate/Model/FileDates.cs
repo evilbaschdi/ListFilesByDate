@@ -8,7 +8,6 @@ public class FileDates
 {
     /// <summary>
     /// </summary>
-
     public DateTime CreationTime { get; init; }
 
     /// <summary>
@@ -25,17 +24,14 @@ public class FileDates
 
     /// <summary>
     /// </summary>
-
     public DateTime LastAccessTimeUtc { get; init; }
 
     /// <summary>
     /// </summary>
-
     public DateTime LastWriteTime { get; init; }
 
     /// <summary>
     /// </summary>
-
     public DateTime LastWriteTimeUtc { get; init; }
 
     /// <summary>
