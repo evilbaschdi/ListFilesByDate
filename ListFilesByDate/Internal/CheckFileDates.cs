@@ -9,15 +9,9 @@ public class CheckFileDates : ICheckFileDates
     /// <inheritdoc />
     public bool IsDifferent(string path, string dateType, DateTime filter, bool? direction)
     {
-        if (path == null)
-        {
-            throw new ArgumentNullException(nameof(path));
-        }
+        ArgumentNullException.ThrowIfNull(path);
 
-        if (dateType == null)
-        {
-            throw new ArgumentNullException(nameof(dateType));
-        }
+        ArgumentNullException.ThrowIfNull(dateType);
 
         var fileDate = new DateTime();
 
@@ -47,10 +41,7 @@ public class CheckFileDates : ICheckFileDates
     /// <inheritdoc />
     public FileDates ValueFor(string path)
     {
-        if (path == null)
-        {
-            throw new ArgumentNullException(nameof(path));
-        }
+        ArgumentNullException.ThrowIfNull(path);
 
         var fileDates = new FileDates
                         {
